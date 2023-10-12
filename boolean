@@ -1,0 +1,105 @@
+
+import pandas as pd
+import numpy as np
+from sympy import symbols, Or, And, Not, satisfiable, simplify
+from sympy.logic.boolalg import to_cnf, is_cnf
+import itertools
+import math
+
+
+def negate(x):
+    if x[0] == '~':
+        return x[1:]
+    else:
+        return '~' + x
+
+def is_satisfiable(cnf):
+    x = cnf.split("/\\")
+    len_stored = len(x)
+    literas = {x for x in cnf if x in "abcdefghijklmnopqrstuvwxyz"}
+
+    for i in range(0, len(x)):
+        x[i] = x[i].translate({ord('('): None})
+        x[i] = x[i].translate({ord(')'): None})
+        x[i] = x[i].translate({ord(' '): None})
+        if "->" in x[i]:
+            x[i] = x[i].split('->')
+            x[i][1] = negate(x[i][1])
+        # elif "/\\" in x[i]:
+        #     x[i] = x[i].split('\\/')
+        elif "\\/" in x[i]:
+            x[i] = x[i].split("\\/")
+            # print(x[i][1])
+            # x[i].extend("\\/")
+        elif len(x[i]) == 0:
+            print('Check CNF! (╯°□°)╯︵ ┻━┻ ')
+    for var in literas:
+        # for i, c in enumerate(x):
+        #     if var in c:
+        #         print(i,c,var)
+        asserting = [i for i, c in enumerate(x) if var in c]
+        # print(var, asserting)
+        negating = [i for i, c in enumerate(x) if negate(var) in c]
+        # print(var, negating)
+
+        for i, k in itertools.product(asserting, negating):
+            # print(x[i],x[k])
+            id1 = abs(x[i].index(var) - 1)
+            id2 = abs(x[k].index(negate(var)) - 1)
+            if (x[i][id1] == x[k][id2]):
+                x.append(x[i][1])
+    for var in literas:
+        if var in x and negate(var) in x:
+            return False
+    return True ;
+
+
+
+def sat_assignment(cnf):
+    dict = {}
+    if is_satisfiable(cnf) == False:
+        return None
+    else:
+        x = cnf.split("/\\")
+        len_stored = len(x)
+        literas = {x for x in cnf if x in "abcdefghijklmnopqrstuvwxyz"}
+
+
+    for i in range(0, len(x)):
+        x[i] = x[i].translate({ord('('): None})
+        x[i] = x[i].translate({ord(')'): None})
+        x[i] = x[i].translate({ord(' '): None})
+        if "->" in x[i]:
+            x[i] = x[i].split('->')
+            x[i][1] = negate(x[i][1])
+        # elif "/\\" in x[i]:
+        #     x[i] = x[i].split('\\/')
+        elif "\\/" in x[i]:
+            x[i] = x[i].split("\\/")
+            # print(x[i][1])
+            # x[i].extend("\\/")
+        elif len(x[i]) == 0:
+            print('Check CNF! (╯°□°)╯︵ ┻━┻ ')
+    for var in literas:
+        # for i, c in enumerate(x):
+        #     if var in c:
+        #         print(i,c,var)
+        asserting = [i for i, c in enumerate(x) if var in c]
+        # print(var, asserting)
+        negating = [i for i, c in enumerate(x) if negate(var) in c]
+        # print(var, negating)
+
+        for i, k in itertools.product(asserting, negating):
+            # print(x[i],x[k])
+            id1 = abs(x[i].index(var) - 1)
+            id2 = abs(x[k].index(negate(var)) - 1)
+            if (x[i][id1] == x[k][id2]):
+                x.append(x[i][1])
+    for var in literas:
+        if var in x:
+            dict[var] = True
+        elif negate(var) in x:
+            dict[var] = False
+        else:
+            dict[var] =True
+    return dict
